@@ -4,16 +4,16 @@ on:
     branches: [master]
 
 env: 
-  APP_NAME: bitorbit-synapse
-  REPO: ${{ secrets.GAR_PROD }}/${{ secrets.GCP_PROD_PROJECT }}/docker
+  APP_NAME: bapp-synapse
+  REPO: ${{ secrets.GAR_BAPP_PROD }}/${{ secrets.GCP_BAPP_PROD_PROJECT }}/docker
   IMAGE_TAG: ${{ github.sha }}
   BRANCH_NAME: ${{ github.ref_name }}
-  ENVIRONMENT: prod-london
+  ENVIRONMENT: bapp-prod
 
 jobs:
   docker-build:
     name: Build and push
-    runs-on: prod-london
+    runs-on: bapp-prod
     steps:
       - uses: actions/checkout@v3
       - uses: google-github-actions/setup-gcloud@v0
@@ -21,22 +21,22 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
         run: |
-          gcloud auth configure-docker ${{ secrets.GAR_PROD }} -q
+          gcloud auth configure-docker ${{ secrets.GAR_BAPP_DEV }} -q
           docker build -t $REPO/$APP_NAME:$IMAGE_TAG . -f docker/Dockerfile
           docker tag $REPO/$APP_NAME:$IMAGE_TAG $REPO/$APP_NAME:${BRANCH_NAME}
           docker push $REPO/$APP_NAME:$IMAGE_TAG
           docker push $REPO/$APP_NAME:${BRANCH_NAME}
   deploy:
     name: Deploy via Helmfile
-    runs-on: prod-london
+    runs-on: bapp-prod
     needs: docker-build
     steps:
-      - name: Check out bitorbit-prod-infra
+      - name: Check out bitorbit-infra
         uses: actions/checkout@v3
         with:
-          repository: BitorbitLabs/bitorbit-prod-infra
+          repository: BitorbitLabs/bitorbit-infra
           ref: master
-          ssh-key: ${{ secrets.SSH_KEY_PROD_INFRA }}
+          ssh-key: ${{ secrets.SSH_KEY_INFRA }}
       - name: Deploy via helmfile
         id: deploy
         run: >
