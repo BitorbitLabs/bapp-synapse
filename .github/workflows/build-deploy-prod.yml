@@ -21,7 +21,7 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
         run: |
-          gcloud auth configure-docker ${{ secrets.GAR_BAPP_DEV }} -q
+          gcloud auth configure-docker ${{ secrets.GAR_BAPP_PROD }} -q
           docker build -t $REPO/$APP_NAME:$IMAGE_TAG . -f docker/Dockerfile
           docker tag $REPO/$APP_NAME:$IMAGE_TAG $REPO/$APP_NAME:${BRANCH_NAME}
           docker push $REPO/$APP_NAME:$IMAGE_TAG
